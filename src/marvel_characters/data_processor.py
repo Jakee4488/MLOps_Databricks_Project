@@ -31,40 +31,54 @@ class DataProcessor:
         num_features = self.config.num_features
         target = self.config.target
 
-        self.df.rename(columns={"Height (m)": "Height"}, inplace=True)
-        self.df.rename(columns={"Weight (kg)": "Weight"}, inplace=True)
+        # Use .rename() on self.df directly, which is generally safe.
+        self.df.rename(columns={"Height (m)": "Height", "Weight (kg)": "Weight"}, inplace=True)
 
-        # Universe
-        self.df["Universe"] = self.df["Universe"].fillna("Unknown")
+        # --- Universe ---
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Universe"] = self.df["Universe"].fillna("Unknown")
         counts = self.df["Universe"].value_counts()
         small_universes = counts[counts < 50].index
-        self.df["Universe"] = self.df["Universe"].replace(small_universes, "Other")
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Universe"] = self.df["Universe"].replace(small_universes, "Other")
 
-        # Teams
-        self.df["Teams"] = self.df["Teams"].notna().astype("int")
+        # --- Teams ---
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Teams"] = self.df["Teams"].notna().astype("int")
 
-        # Origin
-        self.df["Origin"] = self.df["Origin"].fillna("Unknown")
+        # --- Origin ---
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Origin"] = self.df["Origin"].fillna("Unknown")
 
-        # Identity
-        self.df["Identity"] = self.df["Identity"].fillna("Unknown")
-        self.df = self.df[self.df["Identity"].isin(["Public", "Secret", "Unknown"])]
+        # --- Identity ---
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Identity"] = self.df["Identity"].fillna("Unknown")
+        # Fix: When filtering (slicing), explicitly use .copy() to stop tracking history.
+        self.df = self.df[self.df["Identity"].isin(["Public", "Secret", "Unknown"])].copy()
 
-        # Gender
-        self.df["Gender"] = self.df["Gender"].fillna("Unknown")
-        self.df["Gender"] = self.df["Gender"].where(self.df["Gender"].isin(["Male", "Female"]), other="Other")
+        # --- Gender ---
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Gender"] = self.df["Gender"].fillna("Unknown")
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Gender"] = self.df["Gender"].where(self.df["Gender"].isin(["Male", "Female"]), other="Other")
 
-        # Marital status
+        # --- Marital status ---
+        # Fix: Rename first to get a clean column name for the next operations.
         self.df.rename(columns={"Marital Status": "Marital_Status"}, inplace=True)
-        self.df["Marital_Status"] = self.df["Marital_Status"].fillna("Unknown")
-        self.df["Marital_Status"] = self.df["Marital_Status"].replace("Widow", "Widowed")
-        self.df = self.df[self.df["Marital_Status"].isin(["Single", "Married", "Widowed", "Engaged", "Unknown"])]
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Marital_Status"] = self.df["Marital_Status"].fillna("Unknown")
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Marital_Status"] = self.df["Marital_Status"].replace("Widow", "Widowed")
+        # Fix: When filtering (slicing), explicitly use .copy() to stop tracking history.
+        self.df = self.df[self.df["Marital_Status"].isin(["Single", "Married", "Widowed", "Engaged", "Unknown"])].copy()
 
-        # Magic
-        self.df["Magic"] = self.df["Origin"].str.lower().apply(lambda x: int("magic" in x))
+        # --- Magic ---
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Magic"] = self.df["Origin"].str.lower().apply(lambda x: int("magic" in x))
 
-        # Mutant
-        self.df["Mutant"] = self.df["Origin"].str.lower().apply(lambda x: int("mutate" in x or "mutant" in x))
+        # --- Mutant ---
+        # Fix: Use .loc to ensure direct assignment to the column.
+        self.df.loc[:, "Mutant"] = self.df["Origin"].str.lower().apply(lambda x: int("mutate" in x or "mutant" in x))
 
         # Normalize origin
         def normalize_origin(x: str) -> str:

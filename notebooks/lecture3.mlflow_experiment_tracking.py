@@ -96,6 +96,7 @@ mlflow.start_run(run_id=run_id)
 
 # COMMAND ----------
 # this will fail: not allowed to overwrite value
+# this will work in databrciks notebooks but not upadte
 mlflow.log_param("type", "marvel_demo2")
 # COMMAND ----------
 mlflow.log_param(key="purpose", value="get_certified")
