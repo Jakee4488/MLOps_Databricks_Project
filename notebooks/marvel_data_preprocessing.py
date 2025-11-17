@@ -28,7 +28,6 @@ logger.info(yaml.dump(config, default_flow_style=False))
 spark = SparkSession.builder.getOrCreate()
 
 filepath = "../data/marvel_characters_dataset.csv"
-
 # Load the data
 df = pd.read_csv(filepath)
 
